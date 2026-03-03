@@ -21,7 +21,6 @@ import {
 const menuItems = [
   { title: "Inicio", url: "/", icon: Home },
   { title: "Mis Proyectos", url: "/proyectos", icon: FolderKanban },
-  { title: "Configuración", url: "#", icon: Settings },
 ];
 
 export function AppSidebar() {
