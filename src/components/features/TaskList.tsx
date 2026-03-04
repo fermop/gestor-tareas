@@ -8,11 +8,14 @@ import { toast } from "sonner";
 import { Trash2 } from "lucide-react";
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { Button } from "../ui/button";
 
 interface Task {
   id: string;
@@ -68,7 +71,6 @@ export function TaskList({ projectId }: { projectId: string }) {
   };
 
   const eliminarTarea = async (id: string) => {
-    if (!confirm("¿Estás seguro de eliminar esta tarea?")) return;
     try {
       await deleteDoc(doc(db, "tasks", id));
       toast.success("Tarea eliminada");
@@ -102,14 +104,44 @@ export function TaskList({ projectId }: { projectId: string }) {
                 type="checkbox" 
                 checked={tarea.isCompleted}
                 onChange={() => toggleCompletada(tarea.id, tarea.isCompleted)}
-                className="w-5 h-5 rounded border-zinc-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                className="w-5 h-5 rounded border-zinc-300 dark:border-zinc-600 text-blue-600 focus:ring-blue-500 cursor-pointer"
               />
-              <button 
-                onClick={() => eliminarTarea(tarea.id)}
-                className="text-zinc-400 hover:text-red-500 p-1 transition-colors cursor-pointer"
-              >
-                <Trash2 size={18} />
-              </button>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <button className="text-zinc-400 hover:text-red-500 p-1 transition-colors cursor-pointer">
+                    <Trash2 size={18} />
+                  </button>
+                </DialogTrigger>
+                
+                <DialogContent className="sm:max-w-md bg-zinc-50 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-700">
+                  <DialogTitle className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
+                    Confirmar eliminación
+                  </DialogTitle>
+                  <DialogDescription className="text-zinc-500 dark:text-zinc-400">
+                    ¿Estás seguro de que quieres eliminar esta tarea? Esta acción no se puede deshacer.
+                  </DialogDescription>
+                  
+                  <DialogFooter className="flex justify-end gap-2 mt-4">
+                    <DialogClose asChild>
+                      {/* variant="outline" da un estilo secundario automático */}
+                      <Button variant="outline" className="cursor-pointer">
+                        Cancelar
+                      </Button>
+                    </DialogClose>
+
+                    <DialogClose asChild>
+                      <Button 
+                        variant="destructive" 
+                        className="cursor-pointer" 
+                        onClick={() => eliminarTarea(tarea.id)}
+                      >
+                        Eliminar
+                      </Button>
+                    </DialogClose>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+                
               <span className={`font-medium ${tarea.isCompleted ? "text-zinc-500 line-through" : "text-zinc-800 dark:text-zinc-300"}`}>
                 {tarea.title}
               </span>
