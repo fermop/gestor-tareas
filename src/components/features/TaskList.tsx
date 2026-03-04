@@ -6,6 +6,13 @@ import { db } from "@/lib/firebase";
 import { collection, query, where, onSnapshot, doc, updateDoc, deleteDoc } from "firebase/firestore";
 import { toast } from "sonner";
 import { Trash2 } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 interface Task {
   id: string;
@@ -111,11 +118,27 @@ export function TaskList({ projectId }: { projectId: string }) {
             
             <div className="flex items-center gap-4">
               {tarea.imageUrl && (
-                <img
-                  src={tarea.imageUrl} 
-                  alt="Imagen adjunta" 
-                  className={`h-9 w-16 object-cover rounded-md border border-zinc-200 transition-opacity ${tarea.isCompleted ? "opacity-50" : "opacity-100"} hover:opacity-80 cursor-pointer hover:scale-105`} 
-                />
+                <Dialog>
+                  {/* El Trigger es la miniatura a la que le damos clic */}
+                  <DialogTrigger asChild>
+                    <img 
+                      src={tarea.imageUrl} 
+                      alt="Miniatura adjunta" 
+                      className={`h-9 w-16 object-cover rounded-md border border-zinc-200 transition-all duration-300 cursor-pointer hover:opacity-80 hover:scale-[1.02] active:scale-95 ${tarea.isCompleted ? "opacity-50" : "opacity-100"}`} 
+                    />
+                  </DialogTrigger>
+                  
+                  <DialogContent className="max-w-4xl border-none bg-transparent p-0 shadow-none flex justify-center">
+                    <DialogTitle className="sr-only">Vista ampliada</DialogTitle>
+                    <DialogDescription className="sr-only">Imagen adjunta a la tarea: {tarea.title}</DialogDescription>
+
+                    <img
+                      src={tarea.imageUrl}
+                      alt="Imagen expandida"
+                      className="w-auto h-auto max-h-[85vh] max-w-full object-contain rounded-lg shadow-2xl"
+                    />
+                  </DialogContent>
+                </Dialog>
               )}
               <span className={`h-fit text-xs ${tarea.isCompleted ? "text-zinc-500 line-through bg-zinc-100 dark:bg-zinc-950" : "text-zinc-800 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-900"} px-2 py-1 rounded-md`}>
                 {new Date(tarea.createdAt).toLocaleDateString()}
