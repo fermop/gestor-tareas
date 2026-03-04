@@ -89,35 +89,38 @@ export function TaskList({ projectId }: { projectId: string }) {
             tarea.isCompleted ? "bg-zinc-50 dark:bg-zinc-900 border-transparent opacity-60" : "bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 hover:border-zinc-300 shadow-sm"
           }`}
         >
-          <div className="flex items-center gap-3">
-            {/* El checkbox que dispara el UPDATE */}
-            <input 
-              type="checkbox" 
-              checked={tarea.isCompleted}
-              onChange={() => toggleCompletada(tarea.id, tarea.isCompleted)}
-              className="w-5 h-5 rounded border-zinc-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
-            />
-            <button 
-              onClick={() => eliminarTarea(tarea.id)}
-              className="text-zinc-400 hover:text-red-500 p-1 transition-colors cursor-pointer"
-            >
-              <Trash2 size={18} />
-            </button>
-            <span className={`font-medium ${tarea.isCompleted ? "text-zinc-500 line-through" : "text-zinc-800 dark:text-zinc-300"}`}>
-              {tarea.title}
-            </span>
-
-            {tarea.imageUrl && (
-              <img
-                src={tarea.imageUrl} 
-                alt="Imagen adjunta" 
-                className={`mt-3 h-18 w-32 object-cover rounded-md border border-zinc-200 transition-opacity ${tarea.isCompleted ? "opacity-50" : "opacity-100"}`} 
+            <div className="flex items-center gap-3">
+              {/* El checkbox que dispara el UPDATE */}
+              <input 
+                type="checkbox" 
+                checked={tarea.isCompleted}
+                onChange={() => toggleCompletada(tarea.id, tarea.isCompleted)}
+                className="w-5 h-5 rounded border-zinc-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
               />
-            )}
-          </div>
-          <span className={`text-xs ${tarea.isCompleted ? "text-zinc-500 line-through bg-zinc-100 dark:bg-zinc-950" : "text-zinc-800 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-900"} px-2 py-1 rounded-md`}>
-            {new Date(tarea.createdAt).toLocaleDateString()}
-          </span>
+              <button 
+                onClick={() => eliminarTarea(tarea.id)}
+                className="text-zinc-400 hover:text-red-500 p-1 transition-colors cursor-pointer"
+              >
+                <Trash2 size={18} />
+              </button>
+              <span className={`font-medium ${tarea.isCompleted ? "text-zinc-500 line-through" : "text-zinc-800 dark:text-zinc-300"}`}>
+                {tarea.title}
+              </span>
+
+            </div>
+            
+            <div className="flex items-center gap-4">
+              {tarea.imageUrl && (
+                <img
+                  src={tarea.imageUrl} 
+                  alt="Imagen adjunta" 
+                  className={`h-9 w-16 object-cover rounded-md border border-zinc-200 transition-opacity ${tarea.isCompleted ? "opacity-50" : "opacity-100"} hover:opacity-80 cursor-pointer hover:scale-105`} 
+                />
+              )}
+              <span className={`h-fit text-xs ${tarea.isCompleted ? "text-zinc-500 line-through bg-zinc-100 dark:bg-zinc-950" : "text-zinc-800 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-900"} px-2 py-1 rounded-md`}>
+                {new Date(tarea.createdAt).toLocaleDateString()}
+              </span>
+            </div>
         </div>
       ))}
     </div>
