@@ -5,17 +5,15 @@ import { db } from "@/lib/firebase";
 // Importamos doc y updateDoc para hacer el UPDATE
 import { collection, query, where, onSnapshot, doc, updateDoc, deleteDoc } from "firebase/firestore";
 import { toast } from "sonner";
-import { Trash2 } from "lucide-react";
 import {
   Dialog,
-  DialogClose,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Button } from "../ui/button";
+import { TaskDropdownMenu } from "./TaskDropdownMenu";
+import ModalConfirmDelete from "./ModalConfirmDelete";
 
 interface Task {
   id: string;
@@ -28,6 +26,7 @@ interface Task {
 export function TaskList({ projectId }: { projectId: string }) {
   const [tareas, setTareas] = useState<Task[]>([]);
   const [cargando, setCargando] = useState(true);
+  const [tareaAEliminarId, setTareaAEliminarId] = useState<string | null>(null);
 
   useEffect(() => {
     const q = query(
@@ -74,6 +73,7 @@ export function TaskList({ projectId }: { projectId: string }) {
     try {
       await deleteDoc(doc(db, "tasks", id));
       toast.success("Tarea eliminada");
+      setTareaAEliminarId(null);
     } catch (error) {
       toast.error("No se pudo eliminar");
     }
@@ -98,9 +98,16 @@ export function TaskList({ projectId }: { projectId: string }) {
             tarea.isCompleted ? "bg-zinc-50 dark:bg-zinc-900 border-transparent opacity-60" : "bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 hover:border-zinc-300 shadow-sm"
           }`}
         >       
-          <span className={`w-fit h-fit text-xs ${tarea.isCompleted ? "text-zinc-500 line-through bg-zinc-100 dark:bg-zinc-950" : "text-zinc-800 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-900"} px-2 py-1 rounded-md`}>
-            {new Date(tarea.createdAt).toLocaleDateString()}
-          </span>
+          <div className="flex justify-between">
+            <span className={`w-fit h-fit text-xs ${tarea.isCompleted ? "text-zinc-500 line-through bg-zinc-100 dark:bg-zinc-950" : "text-zinc-800 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-900"} px-2 py-1 rounded-md`}>
+              {new Date(tarea.createdAt).toLocaleDateString()}
+            </span>
+
+            <TaskDropdownMenu 
+              tareaId={tarea.id}
+              onDeleteClick={setTareaAEliminarId}
+            />
+          </div>
 
           <div className="flex items-center gap-3">
             {/* El checkbox que dispara el UPDATE */}
@@ -110,57 +117,20 @@ export function TaskList({ projectId }: { projectId: string }) {
               onChange={() => toggleCompletada(tarea.id, tarea.isCompleted)}
               className="w-5 h-5 rounded border-zinc-300 dark:border-zinc-600 text-blue-600 focus:ring-blue-500 cursor-pointer"
             />
-            <Dialog>
-              <DialogTrigger asChild>
-                <button className="text-zinc-400 hover:text-red-500 p-1 transition-colors cursor-pointer">
-                  <Trash2 size={18} />
-                </button>
-              </DialogTrigger>
-              
-              <DialogContent className="sm:max-w-md bg-zinc-50 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-700">
-                <DialogTitle className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
-                  Confirmar eliminación
-                </DialogTitle>
-                <DialogDescription className="text-zinc-500 dark:text-zinc-400">
-                  ¿Estás seguro de que quieres eliminar esta tarea? Esta acción no se puede deshacer.
-                </DialogDescription>
-                
-                <DialogFooter className="flex justify-end gap-2 mt-4">
-                  <DialogClose asChild>
-                    {/* variant="outline" da un estilo secundario automático */}
-                    <Button variant="outline" className="cursor-pointer">
-                      Cancelar
-                    </Button>
-                  </DialogClose>
-
-                  <DialogClose asChild>
-                    <Button 
-                      variant="destructive" 
-                      className="cursor-pointer" 
-                      onClick={() => eliminarTarea(tarea.id)}
-                    >
-                      Eliminar
-                    </Button>
-                  </DialogClose>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
               
             <span className={`font-medium ${tarea.isCompleted ? "text-zinc-500 line-through" : "text-zinc-800 dark:text-zinc-300"}`}>
               {tarea.title}
             </span>
-
           </div>
             
           <div className="flex items-center gap-4">
             {tarea.imageUrl && (
               <Dialog>
-                {/* El Trigger es la miniatura a la que le damos clic */}
                 <DialogTrigger asChild>
                   <img 
                     src={tarea.imageUrl} 
                     alt="Miniatura adjunta" 
-                    className={`h-9 w-16 object-cover rounded-md border border-zinc-200 transition-all duration-300 cursor-pointer hover:opacity-80 hover:scale-[1.02] active:scale-95 ${tarea.isCompleted ? "opacity-50" : "opacity-100"}`} 
+                    className={`h-9 w-16 object-cover rounded-md border border-zinc-200 transition-all duration-300 cursor-pointer hover:opacity-80 hover:scale-[1.02] active:scale-95 ${tarea.isCompleted ? "opacity-50" : "opacity-100"}`}
                   />
                 </DialogTrigger>
                 
@@ -179,6 +149,11 @@ export function TaskList({ projectId }: { projectId: string }) {
           </div>
         </div>
       ))}
+      <ModalConfirmDelete 
+        isOpen={tareaAEliminarId !== null}
+        onClose={() => setTareaAEliminarId(null)}
+        onConfirm={() => tareaAEliminarId && eliminarTarea(tareaAEliminarId)}
+      />
     </div>
   );
 }
