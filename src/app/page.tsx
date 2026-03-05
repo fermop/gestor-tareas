@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { auth } from "@/lib/firebase";
 import { onAuthStateChanged, User } from "firebase/auth";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function HomePage() {
   const [user, setUser] = useState<User | null>(null);
@@ -33,7 +34,7 @@ export default function HomePage() {
         {/* Contenedor de altura fija para evitar saltos en la pantalla mientras carga */}
         <div className="flex justify-center gap-4 min-h-[50px] items-center">
           {loading ? (
-            <div className="text-zinc-500 animate-pulse">Verificando sesión...</div>
+            <Skeleton className="h-12 w-75 rounded-xl" />
           ) : user ? (
             // Si HAY un usuario logueado, mostramos el botón directo al Dashboard
             <Link 
