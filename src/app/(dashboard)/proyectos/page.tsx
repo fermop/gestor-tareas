@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 import { db, auth } from "@/lib/firebase";
 import { collection, addDoc, getDocs, query, where } from "firebase/firestore";
 import { onAuthStateChanged, User } from "firebase/auth";
+import { toast } from "sonner";
 
 export default function ProyectosPage() {
   const [user, setUser] = useState<User | null>(null);
@@ -54,8 +55,10 @@ export default function ProyectosPage() {
       
       setNombreProyecto(""); // Limpiar el input
       cargarProyectos(user.uid); // Recargar la lista
+      toast.success(`Proyecto "${nombreProyecto}" creado correctamente`);
     } catch (error) {
       console.error("Error al crear proyecto:", error);
+      toast.error("Error al crear proyecto");
     }
   };
 
