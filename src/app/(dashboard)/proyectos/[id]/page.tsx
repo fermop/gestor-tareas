@@ -1,6 +1,6 @@
-import { TaskForm } from "@/components/features/TaskForm";
-import { TaskList } from "@/components/features/TaskList";
-import { ProjectHeader } from "@/components/features/ProjectHeader";
+import { TaskForm } from "@/features/tasks/components/TaskForm";
+import { TaskList } from "@/features/tasks/components/TaskList";
+import { ProjectHeader } from "@/features/projects/components/ProjectHeader";
 
 export default async function ProyectoDetallePage({
   params,

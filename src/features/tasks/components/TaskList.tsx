@@ -13,7 +13,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { TaskDropdownMenu } from "./TaskDropdownMenu";
-import ModalConfirmDelete from "./ModalConfirmDelete";
+import ModalConfirmDelete from "@/components/ui/ModalConfirmDelete";
 
 interface Task {
   id: string;

@@ -1,6 +1,6 @@
-import { AppSidebar } from "@/components/features/AppSidebar";
+import { AppSidebar } from "@/components/layout/AppSidebar";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import { AuthGuard } from "@/components/features/AuthGuard"; // <-- 1. Importar
+import { AuthGuard } from "@/features/auth/components/AuthGuard"; // <-- 1. Importar
 
 export default function DashboardLayout({
   children,
