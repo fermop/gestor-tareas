@@ -1,5 +1,5 @@
 import { db, storage } from "@/lib/firebase";
-import { collection, addDoc, query, where, onSnapshot, doc, updateDoc, deleteDoc } from "firebase/firestore";
+import { collection, addDoc, query, where, onSnapshot, doc, updateDoc, deleteDoc, orderBy } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 export interface Task {
@@ -37,7 +37,11 @@ export const tasksService = {
 
   // 2. Escuchar Tareas en Tiempo Real
   subscribeToTasks: (projectId: string, onUpdate: (tasks: Task[]) => void) => {
-    const q = query(collection(db, "tasks"), where("projectId", "==", projectId));
+    const q = query(
+      collection(db, "tasks"),
+      where("projectId", "==", projectId),
+      orderBy("createdAt", "desc")
+    );
     
     // Retornamos el unsubscribe para que el componente pueda limpiar el listener
     return onSnapshot(q, (snapshot) => {

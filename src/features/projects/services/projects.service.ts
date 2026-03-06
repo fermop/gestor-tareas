@@ -1,5 +1,5 @@
 import { db } from "@/lib/firebase";
-import { collection, addDoc, getDocs, query, where, doc, getDoc } from "firebase/firestore";
+import { collection, addDoc, getDocs, query, where, doc, getDoc, orderBy } from "firebase/firestore";
 
 export interface Project {
   id: string;
@@ -22,7 +22,12 @@ export const projectsService = {
 
   // Función para leer datos (SELECT)
   getProjectsByUserId: async (userId: string) => {
-    const q = query(collection(db, "projects"), where("userId", "==", userId));
+    const q = query(
+      collection(db, "projects"), 
+      where("userId", "==", userId),
+      orderBy("createdAt", "desc")
+    );
+    
     const querySnapshot = await getDocs(q);
     
     return querySnapshot.docs.map(doc => ({
