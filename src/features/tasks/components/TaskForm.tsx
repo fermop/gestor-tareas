@@ -1,15 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { db, auth, storage } from "@/lib/firebase"; // <-- Importamos storage
-import { collection, addDoc } from "firebase/firestore";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage"; // <-- Funciones de Storage
+import { auth } from "@/lib/firebase";
+import { tasksService } from "../services/tasks.service";
 import { toast } from "sonner";
 import { Paperclip } from "lucide-react";
 
 export function TaskForm({ projectId }: { projectId: string }) {
   const [tituloTarea, setTituloTarea] = useState("");
-  const [archivo, setArchivo] = useState<File | null>(null); // Estado para la imagen
+  const [archivo, setArchivo] = useState<File | null>(null);
   const [estaGuardando, setEstaGuardando] = useState(false);
 
   const crearTarea = async (e: React.FormEvent) => {
@@ -19,32 +18,13 @@ export function TaskForm({ projectId }: { projectId: string }) {
     setEstaGuardando(true);
 
     try {
-      let imageUrl = "";
+      await tasksService.createTask(
+        projectId, 
+        tituloTarea, 
+        auth.currentUser.uid, 
+        archivo
+      );
 
-      // 1. Si el usuario seleccionó una imagen, la subimos primero a Storage
-      if (archivo) {
-        // Creamos una "referencia" (la ruta donde se guardará en el bucket)
-        // Ej: tareas/12345/167890_mifoto.jpg
-        const storageRef = ref(storage, `tareas/${projectId}/${Date.now()}_${archivo.name}`);
-        
-        // Subimos el archivo físico
-        await uploadBytes(storageRef, archivo);
-        
-        // Obtenemos la URL pública para poder mostrarla en la pantalla
-        imageUrl = await getDownloadURL(storageRef);
-      }
-
-      // 2. Guardamos la tarea en Firestore (ahora incluyendo la URL de la imagen)
-      await addDoc(collection(db, "tasks"), {
-        title: tituloTarea,
-        projectId: projectId,
-        userId: auth.currentUser.uid,
-        isCompleted: false,
-        createdAt: new Date().toISOString(),
-        imageUrl: imageUrl, // <-- Guardamos la URL aquí
-      });
-
-      // Limpiamos el formulario
       setTituloTarea("");
       setArchivo(null);
       toast.success("Tarea guardada correctamente");
@@ -76,7 +56,6 @@ export function TaskForm({ projectId }: { projectId: string }) {
         </button>
       </div>
 
-      {/* Botón para seleccionar archivo */}
       <div className="flex items-center gap-2">
         <label className="flex items-center gap-2 cursor-pointer text-sm text-zinc-600 hover:text-zinc-900 transition-colors">
           <Paperclip size={18} />

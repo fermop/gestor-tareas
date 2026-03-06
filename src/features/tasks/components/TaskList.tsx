@@ -1,9 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { db } from "@/lib/firebase";
-// Importamos doc y updateDoc para hacer el UPDATE
-import { collection, query, where, onSnapshot, doc, updateDoc, deleteDoc } from "firebase/firestore";
+import { tasksService, Task } from "../services/tasks.service";
 import { toast } from "sonner";
 import {
   Dialog,
@@ -15,54 +13,24 @@ import {
 import { TaskDropdownMenu } from "./TaskDropdownMenu";
 import ModalConfirmDelete from "@/components/ui/ModalConfirmDelete";
 
-interface Task {
-  id: string;
-  title: string;
-  isCompleted: boolean;
-  createdAt: string;
-  imageUrl?: string;
-}
-
 export function TaskList({ projectId }: { projectId: string }) {
   const [tareas, setTareas] = useState<Task[]>([]);
   const [cargando, setCargando] = useState(true);
   const [tareaAEliminarId, setTareaAEliminarId] = useState<string | null>(null);
 
   useEffect(() => {
-    const q = query(
-      collection(db, "tasks"),
-      where("projectId", "==", projectId)
-    );
-
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const tareasObtenidas = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      })) as Task[];
-
-      // Opcional: Ordenar para que las completadas se vayan al final
-      const tareasOrdenadas = tareasObtenidas.sort((a, b) => 
-        (a.isCompleted === b.isCompleted) ? 0 : a.isCompleted ? 1 : -1
-      );
-
-      setTareas(tareasOrdenadas);
+    // Delegamos la suscripción al servicio
+    const unsubscribe = tasksService.subscribeToTasks(projectId, (tareasActualizadas) => {
+      setTareas(tareasActualizadas);
       setCargando(false);
     });
 
     return () => unsubscribe();
   }, [projectId]);
 
-  // Función para actualizar (UPDATE) el documento en Firestore
   const toggleCompletada = async (tareaId: string, estadoActual: boolean) => {
     try {
-      // 1. Apuntamos al documento exacto usando su ID
-      const tareaRef = doc(db, "tasks", tareaId);
-      
-      // 2. Actualizamos solo el campo isCompleted invirtiendo su valor
-      await updateDoc(tareaRef, {
-        isCompleted: !estadoActual
-      });
-      
+      await tasksService.toggleCompletion(tareaId, estadoActual);
     } catch (error) {
       console.error("Error al actualizar:", error);
       toast.error("No se pudo actualizar la tarea");
@@ -71,7 +39,7 @@ export function TaskList({ projectId }: { projectId: string }) {
 
   const eliminarTarea = async (id: string) => {
     try {
-      await deleteDoc(doc(db, "tasks", id));
+      await tasksService.deleteTask(id);
       toast.success("Tarea eliminada");
       setTareaAEliminarId(null);
     } catch (error) {
@@ -110,7 +78,6 @@ export function TaskList({ projectId }: { projectId: string }) {
           </div>
 
           <div className="flex items-center gap-3">
-            {/* El checkbox que dispara el UPDATE */}
             <input 
               type="checkbox" 
               checked={tarea.isCompleted}
