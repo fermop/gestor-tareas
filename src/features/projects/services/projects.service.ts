@@ -1,5 +1,5 @@
 import { db } from "@/lib/firebase";
-import { collection, addDoc, getDocs, query, where } from "firebase/firestore";
+import { collection, addDoc, getDocs, query, where, doc, getDoc } from "firebase/firestore";
 
 export interface Project {
   id: string;
@@ -9,6 +9,17 @@ export interface Project {
 }
 
 export const projectsService = {
+  // Función para leer un solo proyecto por su ID
+  getProjectById: async (projectId: string) => {
+    const docRef = doc(db, "projects", projectId);
+    const docSnap = await getDoc(docRef);
+    
+    if (docSnap.exists()) {
+      return { id: docSnap.id, ...docSnap.data() } as Project;
+    }
+    return null; // Retornamos null si el proyecto no existe
+  },
+
   // Función para leer datos (SELECT)
   getProjectsByUserId: async (userId: string) => {
     const q = query(collection(db, "projects"), where("userId", "==", userId));

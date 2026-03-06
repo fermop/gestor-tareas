@@ -1,8 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { db } from "@/lib/firebase";
-import { doc, getDoc } from "firebase/firestore";
 import Link from "next/link";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -13,30 +11,42 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { projectsService } from "../services/projects.service";
 
 export function ProjectHeader({ projectId }: { projectId: string }) {
   const [projectName, setProjectName] = useState<string | null>(null);
 
+  // EFECTO 1: Cargar la información del proyecto usando nuestro servicio
   useEffect(() => {
-    const fetchProjectName = async () => {
+    const fetchProject = async () => {
       try {
-        // Hacemos una lectura sencilla (SELECT) de un solo documento
-        const docRef = doc(db, "projects", projectId);
-        const docSnap = await getDoc(docRef);
-        
-        if (docSnap.exists()) {
-          setProjectName(docSnap.data().name);
-        } else {
-          setProjectName("Proyecto no encontrado");
+        // Usamos la función que creamos en el paso anterior
+        const project = await projectsService.getProjectById(projectId);
+        if (project) {
+          setProjectName(project.name);
         }
       } catch (error) {
-        console.error("Error al obtener el proyecto:", error);
-        setProjectName("Error de conexión");
+        console.error("Error al cargar el encabezado del proyecto:", error);
       }
     };
 
-    fetchProjectName();
+    fetchProject();
   }, [projectId]);
+
+  // EFECTO 2: Actualizar el título de la pestaña en el navegador
+  useEffect(() => {
+    // Usamos projectName, que es la variable que declaraste arriba
+    if (projectName) {
+      document.title = `${projectName} | Gestor de Tareas`;
+    } else {
+      document.title = "Cargando proyecto... | Gestor de Tareas";
+    }
+    
+    // Al desmontar el componente (salir de la página), restauramos el título
+    return () => {
+      document.title = "Gestor de Tareas";
+    };
+  }, [projectName]); // Se vuelve a ejecutar si projectName cambia
 
   return (
     <div className="mb-8 space-y-4">
@@ -45,7 +55,6 @@ export function ProjectHeader({ projectId }: { projectId: string }) {
         <BreadcrumbList>
           <BreadcrumbItem>
             <BreadcrumbLink asChild>
-              {/* asChild permite que Shadcn use el Link nativo de Next.js */}
               <Link href="/proyectos" className="text-zinc-500 hover:text-zinc-900 dark:text-zinc-600">
                 Mis Proyectos
               </Link>
@@ -60,17 +69,15 @@ export function ProjectHeader({ projectId }: { projectId: string }) {
                 {projectName}
               </BreadcrumbPage>
             ) : (
-              // Mostramos un pequeño skeleton mientras carga el nombre de la BD
               <Skeleton className="h-4 w-24" />
             )}
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
 
-      {/* Título original que teníamos en la página */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <h1 className="text-3xl font-bold text-zinc-800 dark:text-zinc-50">
-          {projectName ? 'Detalles de proyecto' : <Skeleton className="h-9 w-64" />}
+          {projectName ? projectName : <Skeleton className="h-9 w-64" />}
         </h1>
         <span className="px-3 py-1 bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 rounded-full text-sm font-medium">
           ID: {projectId}
