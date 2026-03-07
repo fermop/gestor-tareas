@@ -1,5 +1,5 @@
 import { db } from "@/lib/firebase";
-import { collection, addDoc, getDocs, query, where, doc, getDoc, orderBy } from "firebase/firestore";
+import { collection, addDoc, getDocs, query, where, doc, getDoc, orderBy, updateDoc } from "firebase/firestore";
 
 export interface Project {
   id: string;
@@ -45,5 +45,13 @@ export const projectsService = {
     });
     
     return docRef.id;
+  },
+
+  // Función para actualizar el nombre de un proyecto
+  updateProjectName: async (projectId: string, newName: string) => {
+    const docRef = doc(db, "projects", projectId);
+    await updateDoc(docRef, {
+      name: newName,
+    });
   }
 };

@@ -12,6 +12,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { projectsService } from "../services/projects.service";
+import { ModalUpdateProjectName } from "./ModalUpdateProjectName";
 
 export function ProjectHeader({ projectId }: { projectId: string }) {
   const [projectName, setProjectName] = useState<string | null>(null);
@@ -76,9 +77,18 @@ export function ProjectHeader({ projectId }: { projectId: string }) {
       </Breadcrumb>
 
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <h1 className="text-3xl font-bold text-zinc-800 dark:text-zinc-50">
-          {projectName ? projectName : <Skeleton className="h-9 w-64" />}
-        </h1>
+        <div className="flex items-center gap-3">
+          <h1 className="text-3xl font-bold text-zinc-800 dark:text-zinc-50">
+            {projectName ? projectName : <Skeleton className="h-9 w-64" />}
+          </h1>
+          {projectName && (
+            <ModalUpdateProjectName 
+              projectId={projectId} 
+              currentName={projectName} 
+              onSuccess={setProjectName} 
+            />
+          )}
+        </div>
         <span className="px-3 py-1 bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 rounded-full text-sm font-medium">
           ID: {projectId}
         </span>
