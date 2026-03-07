@@ -1,4 +1,4 @@
-import { EllipsisVertical, Trash2 } from "lucide-react"
+import { EllipsisVertical, Trash2, Pencil } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -12,23 +12,27 @@ import {
 interface TaskDropdownMenuProps {
   tareaId: string;
   onDeleteClick: (id: string) => void;
+  onEditClick: (id: string) => void;
 }
 
-export function TaskDropdownMenu({ tareaId, onDeleteClick }: TaskDropdownMenuProps) {
+export function TaskDropdownMenu({ tareaId, onDeleteClick, onEditClick }: TaskDropdownMenuProps) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" className="cursor-pointer">
+        <Button variant="outline" className="cursor-pointer h-8 w-8 p-0">
           <EllipsisVertical className="h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="bg-zinc-50 dark:bg-zinc-800">
+      <DropdownMenuContent className="bg-zinc-50 dark:bg-zinc-800" align="end">
         <DropdownMenuGroup>
-          <DropdownMenuItem className="cursor-pointer">Editar tarea</DropdownMenuItem>
+          <DropdownMenuItem className="cursor-pointer" onSelect={() => onEditClick(tareaId)}>
+            <Pencil className="h-4 w-4" />
+            Editar tarea
+          </DropdownMenuItem>
           <DropdownMenuSeparator />
           
           <DropdownMenuItem 
-            className="bg-red-500 dark:bg-red-700 hover:bg-red-800 text-white cursor-pointer" 
+            className="bg-red-500 dark:bg-red-700 hover:bg-red-800 focus:bg-red-600 text-white cursor-pointer" 
             onSelect={() => onDeleteClick(tareaId)}
           >
              <Trash2 className="h-4 w-4 text-white mr-2" />

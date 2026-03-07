@@ -64,6 +64,24 @@ export const tasksService = {
     await updateDoc(taskRef, { isCompleted: !currentStatus });
   },
 
+  updateTask: async (taskId: string, title: string, projectId: string, newFile: File | null) => {
+    const taskRef = doc(db, "tasks", taskId);
+    const updatedData: Partial<Task> = { title };
+
+    if (newFile) {
+      const storageRef = ref(storage, `tareas/${projectId}/${Date.now()}_${newFile.name}`);
+      await uploadBytes(storageRef, newFile);
+      const newImageUrl = await getDownloadURL(storageRef);
+      updatedData.imageUrl = newImageUrl; 
+    }
+
+    await updateDoc(taskRef, updatedData);
+    
+    // 💡 Tip de Senior: En un sistema gigante en producción como DUX, 
+    // aquí agregaríamos código para eliminar la imagen vieja de Storage
+    // para no pagar almacenamiento basura. Para esta práctica, así es perfecto.
+  },
+
   // 4. Eliminar
   deleteTask: async (taskId: string) => {
     await deleteDoc(doc(db, "tasks", taskId));
