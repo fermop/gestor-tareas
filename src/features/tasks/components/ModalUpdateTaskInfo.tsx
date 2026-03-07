@@ -27,11 +27,18 @@ export default function ModalUpdateTaskInfo({ task, isOpen, onClose, onConfirm }
     }
   }, [task, isOpen]);
 
+  const hasChanges = () => {
+    if (!task) return false;
+    const titleChanged = title.trim() !== task.title;
+    const fileChanged = file !== null; // Si hay un archivo seleccionado, hubo cambio
+    return titleChanged || fileChanged;
+  };
+
   const handleGuardar = async () => {
-    if (!title.trim()) return;
+    if (!title.trim() || !hasChanges()) return;
     setIsSaving(true);
     try {
-      await onConfirm(title, file);
+      await onConfirm(title.trim(), file);
       onClose();
     } finally {
       setIsSaving(false);
@@ -91,7 +98,7 @@ export default function ModalUpdateTaskInfo({ task, isOpen, onClose, onConfirm }
           <Button variant="outline" className="cursor-pointer" onClick={onClose} disabled={isSaving}>
             Cancelar
           </Button>
-          <Button className="cursor-pointer" onClick={handleGuardar} disabled={isSaving || !title.trim()}>
+          <Button className="cursor-pointer" onClick={handleGuardar} disabled={isSaving || !title.trim() || !hasChanges()}>
             {isSaving ? "Guardando..." : "Guardar cambios"}
           </Button>
         </DialogFooter>
