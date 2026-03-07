@@ -5,6 +5,9 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import Link from "next/link";
 import { authService } from "../services/auth.service";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 
 export function RegisterForm() {
   const [email, setEmail] = useState("");
@@ -36,35 +39,37 @@ export function RegisterForm() {
     <div className="flex flex-col items-center justify-center min-h-screen p-4 bg-zinc-50 dark:bg-zinc-900">
       <div className="w-full max-w-md p-8 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-600 rounded-2xl shadow-sm">
         <h1 className="text-2xl font-bold text-zinc-800 dark:text-zinc-200 mb-6 text-center">Crear cuenta</h1>
-        
+
         <form onSubmit={handleRegister} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Correo electrónico</label>
-            <input
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="email">Correo electrónico</Label>
+            <Input
+              id="email"
               type="email"
               required
-              className="w-full px-4 py-2 border border-zinc-300 dark:border-zinc-600 rounded-lg focus:ring-2 focus:ring-zinc-500 outline-none bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-300"
+              className="bg-white dark:bg-zinc-800"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
           </div>
-          <div>
-            <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Contraseña</label>
-            <input
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="password">Contraseña</Label>
+            <Input
+              id="password"
               type="password"
               required
-              className="w-full px-4 py-2 border border-zinc-300 dark:border-zinc-600 rounded-lg focus:ring-2 focus:ring-zinc-500 outline-none bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-300"
+              className="bg-white dark:bg-zinc-800"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
           </div>
-          <button
+          <Button
             type="submit"
             disabled={loading}
-            className="w-full py-2 bg-zinc-900 text-white rounded-lg font-semibold hover:bg-zinc-800 dark:hover:bg-zinc-950 transition-colors disabled:opacity-50 cursor-pointer"
+            className="w-full cursor-pointer"
           >
             {loading ? "Registrando..." : "Registrarse"}
-          </button>
+          </Button>
         </form>
 
         <p className="mt-6 text-center text-sm text-zinc-600 dark:text-zinc-400">
