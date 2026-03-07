@@ -40,8 +40,8 @@ export function ProjectsView() {
 
     try {
       await projectsService.createProject(nombreProyecto, user.uid);
-      setNombreProyecto(""); 
-      cargarProyectos(user.uid); 
+      setNombreProyecto("");
+      cargarProyectos(user.uid);
       toast.success(`Proyecto "${nombreProyecto}" creado correctamente`);
     } catch (error) {
       console.error("Error al crear proyecto:", error);
@@ -63,9 +63,10 @@ export function ProjectsView() {
           placeholder="Ej. Tareas de la Universidad..."
           className="flex-1 px-4 py-2 border border-zinc-300 rounded-md focus:outline-none focus:ring-2 focus:ring-zinc-500"
         />
-        <button 
+        <button
           type="submit"
-          className="px-6 py-2 bg-zinc-900 dark:bg-zinc-800 text-white rounded-md hover:bg-zinc-800 dark:hover:bg-zinc-950 transition-colors cursor-pointer"
+          className="px-6 py-2 bg-zinc-900 dark:bg-zinc-800 text-white rounded-md hover:bg-zinc-800 dark:hover:bg-zinc-950 transition-colors cursor-pointer disabled:cursor-not-allowed"
+          disabled={!nombreProyecto.trim()}
         >
           Crear Proyecto
         </button>
@@ -73,9 +74,9 @@ export function ProjectsView() {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {proyectos.map((proyecto) => (
-          <Link 
-            href={`/proyectos/${proyecto.id}`} 
-            key={proyecto.id} 
+          <Link
+            href={`/proyectos/${proyecto.id}`}
+            key={proyecto.id}
             className="block p-6 bg-white dark:bg-zinc-800 border border-zinc-200 rounded-xl shadow-sm hover:shadow-md transition-shadow cursor-pointer"
           >
             <h3 className="text-xl font-semibold text-zinc-800 dark:text-zinc-50">{proyecto.name}</h3>
