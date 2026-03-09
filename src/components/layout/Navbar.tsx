@@ -108,7 +108,7 @@ export function Navbar() {
                 <span className="sr-only">Abrir menú</span>
               </button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-72">
+            <SheetContent side="right" className="w-72 bg-sidebar">
               <SheetHeader>
                 <SheetTitle>Menú</SheetTitle>
               </SheetHeader>
