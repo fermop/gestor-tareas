@@ -17,11 +17,12 @@ import {
   SidebarMenuItem,
   SidebarFooter,
 } from "@/components/ui/sidebar";
-import { ThemeToggle } from "./ThemeToggle"; // <-- 1. Importar el componente
+import { ThemeToggle } from "./ThemeToggle";
 
 const menuItems = [
   { title: "Inicio", url: "/", icon: Home },
   { title: "Mis Proyectos", url: "/proyectos", icon: FolderKanban },
+  { title: "Configuración", url: "/configuracion", icon: Settings },
 ];
 
 export function AppSidebar() {
@@ -60,12 +61,12 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-      
+
       <SidebarFooter>
         <SidebarMenu>
           {/* 2. Insertamos el Toggle de Tema aquí */}
           <ThemeToggle />
-          
+
           <SidebarMenuItem>
             <SidebarMenuButton onClick={handleLogout} className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30 cursor-pointer">
               <LogOut size={18} />
