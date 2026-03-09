@@ -3,7 +3,8 @@ import {
   signInWithEmailAndPassword, 
   GoogleAuthProvider, 
   signInWithPopup, 
-  createUserWithEmailAndPassword 
+  createUserWithEmailAndPassword,
+  updateProfile,
 } from "firebase/auth";
 
 export const authService = {
@@ -19,7 +20,9 @@ export const authService = {
   },
 
   // 3. Registrar nuevo usuario
-  registerWithEmail: async (email: string, pass: string) => {
-    return await createUserWithEmailAndPassword(auth, email, pass);
+  registerWithEmail: async (email: string, pass: string, name: string) => {
+    const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
+    await updateProfile(userCredential.user, { displayName: name });
+    return userCredential;
   }
 };
