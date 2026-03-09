@@ -42,7 +42,7 @@ export function ProjectHeader({ projectId }: { projectId: string }) {
     } else {
       document.title = "Cargando proyecto... | Gestor de Tareas";
     }
-    
+
     // Al desmontar el componente (salir de la página), restauramos el título
     return () => {
       document.title = "Gestor de Tareas";
@@ -61,9 +61,9 @@ export function ProjectHeader({ projectId }: { projectId: string }) {
               </Link>
             </BreadcrumbLink>
           </BreadcrumbItem>
-          
+
           <BreadcrumbSeparator />
-          
+
           <BreadcrumbItem>
             {projectName ? (
               <BreadcrumbPage className="font-medium text-zinc-900 dark:text-zinc-300">
@@ -82,16 +82,13 @@ export function ProjectHeader({ projectId }: { projectId: string }) {
             {projectName ? projectName : <Skeleton className="h-9 w-64" />}
           </h1>
           {projectName && (
-            <ModalUpdateProjectName 
-              projectId={projectId} 
-              currentName={projectName} 
-              onSuccess={setProjectName} 
+            <ModalUpdateProjectName
+              projectId={projectId}
+              currentName={projectName}
+              onSuccess={setProjectName}
             />
           )}
         </div>
-        <span className="px-3 py-1 bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 rounded-full text-sm font-medium">
-          ID: {projectId}
-        </span>
       </div>
     </div>
   );
