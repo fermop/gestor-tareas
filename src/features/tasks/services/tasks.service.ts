@@ -1,6 +1,7 @@
 import { db, storage } from "@/lib/firebase";
 import { collection, addDoc, query, where, onSnapshot, doc, updateDoc, deleteDoc, orderBy, getDoc } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
+import { validateTaskTitle, validateImageFile, validateId } from "@/lib/validators";
 
 export interface Task {
   id: string;
@@ -15,6 +16,11 @@ export interface Task {
 export const tasksService = {
   // 1. Create task (with optional image)
   createTask: async (projectId: string, title: string, userId: string, file: File | null) => {
+    validateId(projectId, "Project ID");
+    validateId(userId, "User ID");
+    const validTitle = validateTaskTitle(title);
+    if (file) validateImageFile(file);
+
     let imageUrl = "";
 
     if (file) {
@@ -24,12 +30,12 @@ export const tasksService = {
     }
 
     const docRef = await addDoc(collection(db, "tasks"), {
-      title: title,
-      projectId: projectId,
-      userId: userId,
+      title: validTitle,
+      projectId,
+      userId,
       isCompleted: false,
       createdAt: new Date().toISOString(),
-      imageUrl: imageUrl,
+      imageUrl,
     });
 
     return docRef.id;
@@ -37,6 +43,9 @@ export const tasksService = {
 
   // 2. Listen to tasks in real-time
   subscribeToTasks: (projectId: string, userId: string, onUpdate: (tasks: Task[]) => void) => {
+    validateId(projectId, "Project ID");
+    validateId(userId, "User ID");
+
     const q = query(
       collection(db, "tasks"),
       where("projectId", "==", projectId),
@@ -61,16 +70,27 @@ export const tasksService = {
 
   // 3. Toggle task completion
   toggleCompletion: async (taskId: string, currentStatus: boolean) => {
+    validateId(taskId, "Task ID");
+
     const taskRef = doc(db, "tasks", taskId);
     await updateDoc(taskRef, { isCompleted: !currentStatus });
   },
 
+  // 4. Update task info (title, image)
   updateTask: async (taskId: string, title: string, projectId: string, newFile: File | null, removeImage: boolean = false) => {
+    validateId(taskId, "Task ID");
+    validateId(projectId, "Project ID");
+    const validTitle = validateTaskTitle(title);
+    if (newFile) validateImageFile(newFile);
+
     const taskRef = doc(db, "tasks", taskId);
-    const updatedData: Partial<Task> = { title };
+    const updatedData: Partial<Task> = { title: validTitle };
 
     // Fetch existing task to check for a previous image
     const taskSnapshot = await getDoc(taskRef);
+    if (!taskSnapshot.exists()) {
+      throw new Error(`Task "${taskId}" not found.`);
+    }
     const previousImageUrl = taskSnapshot.data()?.imageUrl;
 
     if (newFile) {
@@ -103,10 +123,17 @@ export const tasksService = {
     await updateDoc(taskRef, updatedData);
   },
 
-  // 4. Delete task and associated image
+  // 5. Delete task and associated image
   deleteTask: async (taskId: string) => {
+    validateId(taskId, "Task ID");
+
     const taskRef = doc(db, "tasks", taskId);
     const taskSnapshot = await getDoc(taskRef);
+
+    if (!taskSnapshot.exists()) {
+      throw new Error(`Task "${taskId}" not found.`);
+    }
+
     const imageUrl = taskSnapshot.data()?.imageUrl;
 
     // Delete the associated image from Storage if one exists

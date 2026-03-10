@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Pencil } from "lucide-react";
 import { projectsService } from "../services/projects.service";
+import { ValidationError } from "@/lib/validators";
 import { toast } from "sonner";
 
 interface ModalUpdateProjectNameProps {
@@ -35,8 +36,8 @@ export function ModalUpdateProjectName({ projectId, currentName, onSuccess }: Mo
       setIsOpen(false);
       toast.success("Nombre del proyecto actualizado correctamente");
     } catch (error) {
-      console.error("Error al actualizar el nombre:", error);
-      toast.error("Error al actualizar el nombre");
+      const message = error instanceof ValidationError ? error.message : "Error al actualizar el nombre";
+      toast.error(message);
     } finally {
       setIsUpdating(false);
     }

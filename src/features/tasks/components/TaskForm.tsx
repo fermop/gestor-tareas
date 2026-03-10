@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { auth } from "@/lib/firebase";
 import { tasksService } from "../services/tasks.service";
+import { ValidationError } from "@/lib/validators";
 import { toast } from "sonner";
 import { Paperclip, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -31,8 +32,8 @@ export function TaskForm({ projectId }: { projectId: string }) {
       setArchivo(null);
       toast.success("Tarea guardada correctamente");
     } catch (error) {
-      console.error("Error al crear la tarea:", error);
-      toast.error("Hubo un problema al guardar la tarea");
+      const message = error instanceof ValidationError ? error.message : "Hubo un problema al guardar la tarea";
+      toast.error(message);
     } finally {
       setEstaGuardando(false);
     }

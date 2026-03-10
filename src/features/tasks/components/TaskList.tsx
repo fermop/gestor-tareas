@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { auth } from "@/lib/firebase";
 import { onAuthStateChanged, User } from "firebase/auth";
 import { tasksService, Task } from "../services/tasks.service";
+import { ValidationError } from "@/lib/validators";
 import { toast } from "sonner";
 import {
   Dialog,
@@ -46,7 +47,8 @@ export function TaskList({ projectId }: { projectId: string }) {
     try {
       await tasksService.toggleCompletion(tareaId, estadoActual);
     } catch (error) {
-      toast.error("No se pudo actualizar la tarea");
+      const message = error instanceof ValidationError ? error.message : "No se pudo actualizar la tarea";
+      toast.error(message);
     }
   };
 
@@ -56,7 +58,8 @@ export function TaskList({ projectId }: { projectId: string }) {
       toast.success("Tarea eliminada");
       setTareaAEliminarId(null);
     } catch (error) {
-      toast.error("No se pudo eliminar");
+      const message = error instanceof ValidationError ? error.message : "No se pudo eliminar";
+      toast.error(message);
     }
   };
 
@@ -67,8 +70,8 @@ export function TaskList({ projectId }: { projectId: string }) {
       toast.success("Tarea actualizada correctamente");
       setTareaAEditar(null);
     } catch (error) {
-      console.error(error);
-      toast.error("Error al actualizar la tarea");
+      const message = error instanceof ValidationError ? error.message : "Error al actualizar la tarea";
+      toast.error(message);
     }
   };
 

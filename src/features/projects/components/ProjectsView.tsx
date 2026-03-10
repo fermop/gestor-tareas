@@ -6,6 +6,7 @@ import { auth } from "@/lib/firebase";
 import { onAuthStateChanged, User } from "firebase/auth";
 import { toast } from "sonner";
 import { projectsService } from "../services/projects.service";
+import { ValidationError } from "@/lib/validators";
 import { Project } from "../types/project";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -44,8 +45,8 @@ export function ProjectsView() {
       toast.success(`Proyecto "${nombreProyecto}" creado correctamente`);
       setNombreProyecto("");
     } catch (error) {
-      console.error("Error al crear proyecto:", error);
-      toast.error("Error al crear proyecto");
+      const message = error instanceof ValidationError ? error.message : "Error al crear proyecto";
+      toast.error(message);
     }
   };
 
