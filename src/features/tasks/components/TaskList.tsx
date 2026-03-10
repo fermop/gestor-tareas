@@ -48,10 +48,10 @@ export function TaskList({ projectId }: { projectId: string }) {
     }
   };
 
-  const guardarEdicionTarea = async (newTitle: string, newFile: File | null) => {
+  const guardarEdicionTarea = async (newTitle: string, newFile: File | null, removeImage: boolean) => {
     if (!tareaAEditar) return;
     try {
-      await tasksService.updateTask(tareaAEditar.id, newTitle, projectId, newFile);
+      await tasksService.updateTask(tareaAEditar.id, newTitle, projectId, newFile, removeImage);
       toast.success("Tarea actualizada correctamente");
       setTareaAEditar(null);
     } catch (error) {

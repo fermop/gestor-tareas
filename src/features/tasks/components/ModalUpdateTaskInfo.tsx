@@ -5,25 +5,27 @@ import { Dialog, DialogContent, DialogFooter, DialogTitle } from "@/components/u
 import { Button } from '@/components/ui/button';
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Paperclip, X } from "lucide-react";
+import { Paperclip, X, Trash2 } from "lucide-react";
 import { Task } from "../services/tasks.service";
 
 interface ModalUpdateTaskInfoProps {
   task: Task | null;
   isOpen: boolean;
   onClose: () => void;
-  onConfirm: (newTitle: string, newFile: File | null) => Promise<void>; 
+  onConfirm: (newTitle: string, newFile: File | null, removeImage: boolean) => Promise<void>; 
 }
 
 export default function ModalUpdateTaskInfo({ task, isOpen, onClose, onConfirm }: ModalUpdateTaskInfoProps) {
   const [title, setTitle] = useState("");
   const [file, setFile] = useState<File | null>(null);
+  const [removeImage, setRemoveImage] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     if (task && isOpen) {
       setTitle(task.title);
       setFile(null);
+      setRemoveImage(false);
     }
   }, [task, isOpen]);
 
@@ -31,19 +33,34 @@ export default function ModalUpdateTaskInfo({ task, isOpen, onClose, onConfirm }
     if (!task) return false;
     const titleChanged = title.trim() !== task.title;
     const fileChanged = file !== null;
-    return titleChanged || fileChanged;
+    return titleChanged || fileChanged || removeImage;
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = e.target.files?.[0] ?? null;
+    setFile(selectedFile);
+    if (selectedFile) setRemoveImage(false);
+  };
+
+  const handleRemoveImage = () => {
+    setRemoveImage(true);
+    setFile(null);
   };
 
   const handleGuardar = async () => {
     if (!title.trim() || !hasChanges()) return;
     setIsSaving(true);
     try {
-      await onConfirm(title.trim(), file);
+      await onConfirm(title.trim(), file, removeImage);
       onClose();
     } finally {
       setIsSaving(false);
     }
   };
+
+  // Determine current image state for display
+  const hasStoredImage = !!task?.imageUrl && !removeImage;
+  const hasNewFile = file !== null;
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
@@ -69,17 +86,21 @@ export default function ModalUpdateTaskInfo({ task, isOpen, onClose, onConfirm }
               <label className="flex items-center gap-2 cursor-pointer text-sm text-stone-500 hover:text-stone-700 dark:text-stone-400 dark:hover:text-stone-200 transition-colors">
                 <Paperclip size={16} />
                 <span className="truncate max-w-50">
-                  {file ? file.name : (task?.imageUrl ? "Cambiar imagen actual" : "Adjuntar nueva imagen")}
+                  {hasNewFile
+                    ? file!.name
+                    : hasStoredImage
+                      ? "Cambiar imagen actual"
+                      : "Adjuntar nueva imagen"}
                 </span>
                 <input 
                   type="file" 
                   accept="image/*" 
                   className="hidden" 
-                  onChange={(e) => setFile(e.target.files ? e.target.files[0] : null)}
+                  onChange={handleFileChange}
                   disabled={isSaving}
                 />
               </label>
-              {file && (
+              {hasNewFile && (
                 <button 
                   type="button" 
                   onClick={() => setFile(null)}
@@ -91,6 +112,34 @@ export default function ModalUpdateTaskInfo({ task, isOpen, onClose, onConfirm }
                 </button>
               )}
             </div>
+
+            {/* Remove stored image option */}
+            {hasStoredImage && !hasNewFile && (
+              <button
+                type="button"
+                onClick={handleRemoveImage}
+                className="flex items-center gap-1.5 text-xs text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300 cursor-pointer transition-colors w-fit mt-1"
+                disabled={isSaving}
+              >
+                <Trash2 size={12} />
+                Eliminar imagen actual
+              </button>
+            )}
+
+            {/* Feedback when image is marked for removal */}
+            {removeImage && !hasNewFile && (
+              <div className="flex items-center justify-between text-xs text-stone-400 dark:text-stone-500 bg-stone-100 dark:bg-stone-800/50 rounded-lg px-3 py-2 mt-1">
+                <span>La imagen se eliminará al guardar</span>
+                <button
+                  type="button"
+                  onClick={() => setRemoveImage(false)}
+                  className="text-amber-600 dark:text-amber-400 hover:underline cursor-pointer ml-2"
+                  disabled={isSaving}
+                >
+                  Deshacer
+                </button>
+              </div>
+            )}
           </div>
         </div>
         

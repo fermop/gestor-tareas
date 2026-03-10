@@ -64,15 +64,16 @@ export const tasksService = {
     await updateDoc(taskRef, { isCompleted: !currentStatus });
   },
 
-  updateTask: async (taskId: string, title: string, projectId: string, newFile: File | null) => {
+  updateTask: async (taskId: string, title: string, projectId: string, newFile: File | null, removeImage: boolean = false) => {
     const taskRef = doc(db, "tasks", taskId);
     const updatedData: Partial<Task> = { title };
 
+    // Fetch existing task to check for a previous image
+    const taskSnapshot = await getDoc(taskRef);
+    const previousImageUrl = taskSnapshot.data()?.imageUrl;
+
     if (newFile) {
       // Delete the previous image from Storage if one exists
-      const taskSnapshot = await getDoc(taskRef);
-      const previousImageUrl = taskSnapshot.data()?.imageUrl;
-
       if (previousImageUrl) {
         try {
           const previousImageRef = ref(storage, previousImageUrl);
@@ -87,6 +88,15 @@ export const tasksService = {
       await uploadBytes(storageRef, newFile);
       const newImageUrl = await getDownloadURL(storageRef);
       updatedData.imageUrl = newImageUrl;
+    } else if (removeImage && previousImageUrl) {
+      // Remove the stored image without replacing it
+      try {
+        const previousImageRef = ref(storage, previousImageUrl);
+        await deleteObject(previousImageRef);
+      } catch (error) {
+        console.error("Failed to delete image from Storage:", error);
+      }
+      updatedData.imageUrl = "";
     }
 
     await updateDoc(taskRef, updatedData);
