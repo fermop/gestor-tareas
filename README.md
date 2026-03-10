@@ -61,9 +61,10 @@ cd taskflow
 ```
 
 ### 2. Install dependencies
+This project strictly uses `pnpm` for package management to ensure consistent dependency resolution across all environments.
+
 ```bash
 pnpm install
-# or npm install
 ```
 
 ### 3. Configure environment variables
