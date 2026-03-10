@@ -5,6 +5,7 @@ import {
   signInWithPopup, 
   createUserWithEmailAndPassword,
   updateProfile,
+  signOut,
 } from "firebase/auth";
 
 export const authService = {
@@ -24,5 +25,11 @@ export const authService = {
     const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
     await updateProfile(userCredential.user, { displayName: name });
     return userCredential;
-  }
+  },
+
+  // 4. Cerrar sesión
+  logout: async () => {
+    document.cookie = "__session=; path=/; max-age=0";
+    await signOut(auth);
+  },
 };

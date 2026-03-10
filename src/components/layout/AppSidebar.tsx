@@ -3,8 +3,7 @@
 import { Home, FolderKanban, Settings, LogOut } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { auth } from "@/lib/firebase";
-import { signOut } from "firebase/auth";
+import { authService } from "@/features/auth/services/auth.service";
 import { toast } from "sonner";
 import {
   Sidebar,
@@ -30,7 +29,7 @@ export function AppSidebar() {
 
   const handleLogout = async () => {
     try {
-      await signOut(auth);
+      await authService.logout();
       toast.success("Has cerrado sesión correctamente");
       router.push("/");
     } catch (error) {
