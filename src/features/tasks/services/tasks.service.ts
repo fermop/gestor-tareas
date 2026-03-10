@@ -36,10 +36,11 @@ export const tasksService = {
   },
 
   // 2. Escuchar Tareas en Tiempo Real
-  subscribeToTasks: (projectId: string, onUpdate: (tasks: Task[]) => void) => {
+  subscribeToTasks: (projectId: string, userId: string, onUpdate: (tasks: Task[]) => void) => {
     const q = query(
       collection(db, "tasks"),
       where("projectId", "==", projectId),
+      where("userId", "==", userId),
       orderBy("createdAt", "desc")
     );
     

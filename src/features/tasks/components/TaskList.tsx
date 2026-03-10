@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { auth } from "@/lib/firebase";
+import { onAuthStateChanged, User } from "firebase/auth";
 import { tasksService, Task } from "../services/tasks.service";
 import { toast } from "sonner";
 import {
@@ -16,6 +18,7 @@ import ModalConfirmDelete from "@/components/ui/ModalConfirmDelete";
 import ModalUpdateTaskInfo from "./ModalUpdateTaskInfo";
 
 export function TaskList({ projectId }: { projectId: string }) {
+  const [user, setUser] = useState<User | null>(null);
   const [tareas, setTareas] = useState<Task[]>([]);
   const [cargando, setCargando] = useState(true);
   
@@ -23,12 +26,21 @@ export function TaskList({ projectId }: { projectId: string }) {
   const [tareaAEliminarId, setTareaAEliminarId] = useState<string | null>(null);
 
   useEffect(() => {
-    const unsubscribe = tasksService.subscribeToTasks(projectId, (tareasActualizadas) => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    if (!user) return;
+
+    const unsubscribe = tasksService.subscribeToTasks(projectId, user.uid, (tareasActualizadas) => {
       setTareas(tareasActualizadas);
       setCargando(false);
     });
     return () => unsubscribe();
-  }, [projectId]);
+  }, [projectId, user]);
 
   const toggleCompletada = async (tareaId: string, estadoActual: boolean) => {
     try {

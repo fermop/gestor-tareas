@@ -1,9 +1,21 @@
 rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
-    match /{allPaths=**} {
-      // Permitir lectura y escritura solo a usuarios logueados
-      allow read, write: if request.auth != null;
+
+    // ── Task images ──
+    // Files are stored as: tareas/{projectId}/{filename}
+    // Only the owner of the project can upload, read, or delete task images.
+    // We verify ownership by checking the project document in Firestore.
+    match /tareas/{projectId}/{fileName} {
+      allow read: if request.auth != null
+                  && firestore.get(/databases/(default)/documents/projects/$(projectId)).data.userId == request.auth.uid;
+
+      allow write: if request.auth != null
+                   && firestore.get(/databases/(default)/documents/projects/$(projectId)).data.userId == request.auth.uid
+                   && (request.resource == null || request.resource.size < 5 * 1024 * 1024)
+                   && (request.resource == null || request.resource.contentType.matches('image/.*'));
     }
+
+    // Deny everything else by default (no match = deny)
   }
 }
