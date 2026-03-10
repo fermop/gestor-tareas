@@ -237,7 +237,7 @@ export default function HomePage() {
           </div>
 
           <a
-            href="https://github.com/fermop/gestor-tareas"
+            href="https://github.com/fermop/taskflow"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 px-8 py-3 bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900 font-semibold rounded-xl hover:bg-stone-800 dark:hover:bg-stone-200 transition-all duration-200"
