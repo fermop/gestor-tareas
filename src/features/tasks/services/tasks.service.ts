@@ -13,7 +13,7 @@ export interface Task {
 }
 
 export const tasksService = {
-  // 1. Crear Tarea (con imagen opcional)
+  // 1. Create task (with optional image)
   createTask: async (projectId: string, title: string, userId: string, file: File | null) => {
     let imageUrl = "";
 
@@ -35,7 +35,7 @@ export const tasksService = {
     return docRef.id;
   },
 
-  // 2. Escuchar Tareas en Tiempo Real
+  // 2. Listen to tasks in real-time
   subscribeToTasks: (projectId: string, userId: string, onUpdate: (tasks: Task[]) => void) => {
     const q = query(
       collection(db, "tasks"),
@@ -43,15 +43,15 @@ export const tasksService = {
       where("userId", "==", userId),
       orderBy("createdAt", "desc")
     );
-    
-    // Retornamos el unsubscribe para que el componente pueda limpiar el listener
+
+    // Return the unsubscribe function for the component to clean up the listener
     return onSnapshot(q, (snapshot) => {
       const tasks = snapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
       })) as Task[];
 
-      const sortedTasks = tasks.sort((a, b) => 
+      const sortedTasks = tasks.sort((a, b) =>
         (a.isCompleted === b.isCompleted) ? 0 : a.isCompleted ? 1 : -1
       );
 
@@ -59,7 +59,7 @@ export const tasksService = {
     });
   },
 
-  // 3. Actualizar Estado
+  // 3. Toggle task completion
   toggleCompletion: async (taskId: string, currentStatus: boolean) => {
     const taskRef = doc(db, "tasks", taskId);
     await updateDoc(taskRef, { isCompleted: !currentStatus });
@@ -103,8 +103,22 @@ export const tasksService = {
     await updateDoc(taskRef, updatedData);
   },
 
-  // 4. Eliminar
+  // 4. Delete task and associated image
   deleteTask: async (taskId: string) => {
-    await deleteDoc(doc(db, "tasks", taskId));
+    const taskRef = doc(db, "tasks", taskId);
+    const taskSnapshot = await getDoc(taskRef);
+    const imageUrl = taskSnapshot.data()?.imageUrl;
+
+    // Delete the associated image from Storage if one exists
+    if (imageUrl) {
+      try {
+        const imageRef = ref(storage, imageUrl);
+        await deleteObject(imageRef);
+      } catch (error) {
+        console.error("Failed to delete task image from Storage:", error);
+      }
+    }
+
+    await deleteDoc(taskRef);
   }
 };
