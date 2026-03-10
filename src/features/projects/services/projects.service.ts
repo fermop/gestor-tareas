@@ -1,12 +1,6 @@
 import { db } from "@/lib/firebase";
-import { collection, addDoc, getDocs, query, where, doc, getDoc, orderBy, updateDoc } from "firebase/firestore";
-
-export interface Project {
-  id: string;
-  name: string;
-  userId: string;
-  createdAt: string;
-}
+import { collection, addDoc, query, where, doc, getDoc, orderBy, updateDoc, onSnapshot } from "firebase/firestore";
+import { Project } from "../types/project";
 
 export const projectsService = {
   // Función para leer un solo proyecto por su ID
@@ -20,20 +14,24 @@ export const projectsService = {
     return null; // Retornamos null si el proyecto no existe
   },
 
-  // Función para leer datos (SELECT)
-  getProjectsByUserId: async (userId: string) => {
+  // Función para escuchar cambios en tiempo real (onSnapshot)
+  subscribeToProjects: (userId: string, onUpdate: (projects: Project[]) => void) => {
     const q = query(
-      collection(db, "projects"), 
+      collection(db, "projects"),
       where("userId", "==", userId),
       orderBy("createdAt", "desc")
     );
-    
-    const querySnapshot = await getDocs(q);
-    
-    return querySnapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    })) as Project[];
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const projects = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+      })) as Project[];
+
+      onUpdate(projects);
+    });
+
+    return unsubscribe;
   },
 
   // Función para guardar datos (INSERT)

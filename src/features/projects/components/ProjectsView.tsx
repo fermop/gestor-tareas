@@ -5,7 +5,8 @@ import { useState, useEffect } from "react";
 import { auth } from "@/lib/firebase";
 import { onAuthStateChanged, User } from "firebase/auth";
 import { toast } from "sonner";
-import { projectsService, Project } from "../services/projects.service";
+import { projectsService } from "../services/projects.service";
+import { Project } from "../types/project";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
@@ -15,24 +16,24 @@ export function ProjectsView() {
   const [nombreProyecto, setNombreProyecto] = useState("");
   const [proyectos, setProyectos] = useState<Project[]>([]);
 
+  // Escuchar cambios de autenticación
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
-      if (currentUser) {
-        cargarProyectos(currentUser.uid);
-      }
     });
     return () => unsubscribe();
   }, []);
 
-  const cargarProyectos = async (userId: string) => {
-    try {
-      const proyectosObtenidos = await projectsService.getProjectsByUserId(userId);
-      setProyectos(proyectosObtenidos);
-    } catch (error) {
-      console.error("Error al cargar proyectos:", error);
-    }
-  };
+  // Escuchar cambios en tiempo real de los proyectos
+  useEffect(() => {
+    if (!user) return;
+
+    const unsubscribe = projectsService.subscribeToProjects(user.uid, (projects) => {
+      setProyectos(projects);
+    });
+
+    return () => unsubscribe();
+  }, [user]);
 
   const crearProyecto = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,9 +41,8 @@ export function ProjectsView() {
 
     try {
       await projectsService.createProject(nombreProyecto, user.uid);
-      setNombreProyecto("");
-      cargarProyectos(user.uid);
       toast.success(`Proyecto "${nombreProyecto}" creado correctamente`);
+      setNombreProyecto("");
     } catch (error) {
       console.error("Error al crear proyecto:", error);
       toast.error("Error al crear proyecto");
