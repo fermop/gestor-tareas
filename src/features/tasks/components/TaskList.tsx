@@ -28,19 +28,25 @@ interface TaskListProps {
   onTasksChange: (tasks: Task[]) => void;
 }
 
-export function TaskList({ 
-  projectId, 
-  tareas, 
-  isLoading, 
-  hasMore, 
-  isFetchingMore, 
-  onLoadMore, 
-  onTasksChange 
+export function TaskList({
+  projectId,
+  tareas,
+  isLoading,
+  hasMore,
+  isFetchingMore,
+  onLoadMore,
+  onTasksChange
 }: TaskListProps) {
   const [tareaAEditar, setTareaAEditar] = useState<Task | null>(null);
   const [tareaAEliminarId, setTareaAEliminarId] = useState<string | null>(null);
 
   const toggleCompletada = async (tareaId: string, estadoActual: boolean) => {
+    // Blur the active element (Checkbox) to prevent browser from auto-scrolling
+    // when the element moves to the bottom of the list.
+    if (typeof document !== "undefined" && document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
+
     // Optimistic UI toggle and sort
     const updatedTasks = tareas.map(t => t.id === tareaId ? { ...t, isCompleted: !estadoActual } : t);
     updatedTasks.sort((a, b) => (a.isCompleted === b.isCompleted) ? 0 : a.isCompleted ? 1 : -1);
@@ -48,12 +54,13 @@ export function TaskList({
 
     try {
       await tasksService.toggleCompletion(tareaId, estadoActual);
+      toast.success("Tarea actualizada correctamente");
     } catch (error) {
       // Revert optimism
       const revertedTasks = tareas.map(t => t.id === tareaId ? { ...t, isCompleted: estadoActual } : t);
       revertedTasks.sort((a, b) => (a.isCompleted === b.isCompleted) ? 0 : a.isCompleted ? 1 : -1);
       onTasksChange(revertedTasks);
-      
+
       const message = error instanceof ValidationError ? error.message : "No se pudo actualizar la tarea";
       toast.error(message);
     }
@@ -78,7 +85,7 @@ export function TaskList({
 
   const guardarEdicionTarea = async (newTitle: string, newFile: File | null, removeImage: boolean) => {
     if (!tareaAEditar) return;
-    
+
     // Optimistic UI for string title changes
     const oldTasks = [...tareas];
     const updatedTasks = tareas.map(t => t.id === tareaAEditar.id ? { ...t, title: newTitle } : t);
@@ -103,13 +110,13 @@ export function TaskList({
   return (
     <div className="mt-8 space-y-3">
       {tareas.map((tarea) => (
-        <div key={tarea.id} className={`p-4 rounded-xl flex flex-col gap-3 transition-all duration-200 ${tarea.isCompleted ? "bg-stone-50 dark:bg-stone-900/30 ring-1 ring-stone-100 dark:ring-stone-800/30 opacity-60" : "bg-white dark:bg-stone-900/60 ring-1 ring-stone-200/80 dark:ring-stone-800/60 hover:ring-stone-300 dark:hover:ring-stone-700 shadow-sm"}`}>       
+        <div key={tarea.id} className={`p-4 rounded-xl flex flex-col gap-3 transition-all duration-200 ${tarea.isCompleted ? "bg-stone-50 dark:bg-stone-900/30 ring-1 ring-stone-100 dark:ring-stone-800/30 opacity-60" : "bg-white dark:bg-stone-900/60 ring-1 ring-stone-200/80 dark:ring-stone-800/60 hover:ring-stone-300 dark:hover:ring-stone-700 shadow-sm"}`}>
           <div className="flex justify-between items-start">
             <span className={`w-fit text-xs font-mono ${tarea.isCompleted ? "text-stone-400 line-through" : "text-stone-500 dark:text-stone-400"} px-2 py-1 rounded-md bg-stone-100/80 dark:bg-stone-800/50`}>
               {new Date(tarea.createdAt).toLocaleDateString()}
             </span>
 
-            <TaskDropdownMenu 
+            <TaskDropdownMenu
               tareaId={tarea.id}
               onDeleteClick={setTareaAEliminarId}
               onEditClick={(id) => {
@@ -129,7 +136,7 @@ export function TaskList({
               {tarea.title}
             </span>
           </div>
-            
+
           <div className="flex items-center gap-4">
             {tarea.imageUrl && (
               <Dialog>
@@ -174,7 +181,7 @@ export function TaskList({
         onConfirm={guardarEdicionTarea}
       />
 
-      <ModalConfirmDelete 
+      <ModalConfirmDelete
         isOpen={tareaAEliminarId !== null}
         onClose={() => setTareaAEliminarId(null)}
         onConfirm={() => tareaAEliminarId && eliminarTarea(tareaAEliminarId)}
