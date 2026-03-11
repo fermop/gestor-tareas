@@ -14,16 +14,32 @@ interface ModalUpdateProjectNameProps {
   projectId: string;
   currentName: string;
   onSuccess: (newName: string) => void;
+  /** When provided, the modal is controlled externally (no internal trigger). */
+  isOpen?: boolean;
+  /** Called when the modal should close (controlled mode). */
+  onClose?: () => void;
 }
 
-export function ModalUpdateProjectName({ projectId, currentName, onSuccess }: ModalUpdateProjectNameProps) {
-  const [isOpen, setIsOpen] = useState(false);
+export function ModalUpdateProjectName({ projectId, currentName, onSuccess, isOpen: externalOpen, onClose }: ModalUpdateProjectNameProps) {
+  const isControlled = externalOpen !== undefined;
+  const [internalOpen, setInternalOpen] = useState(false);
+  const open = isControlled ? externalOpen : internalOpen;
+
   const [newName, setNewName] = useState(currentName);
   const [isUpdating, setIsUpdating] = useState(false);
 
   useEffect(() => {
     setNewName(currentName);
   }, [currentName]);
+
+  const handleOpenChange = (value: boolean) => {
+    if (isControlled) {
+      if (!value && onClose) onClose();
+    } else {
+      setInternalOpen(value);
+    }
+    if (!value) setNewName(currentName);
+  };
 
   const handleUpdateName = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,7 +49,7 @@ export function ModalUpdateProjectName({ projectId, currentName, onSuccess }: Mo
     try {
       await projectsService.updateProjectName(projectId, newName.trim());
       onSuccess(newName.trim());
-      setIsOpen(false);
+      handleOpenChange(false);
       toast.success("Nombre del proyecto actualizado correctamente");
     } catch (error) {
       const message = error instanceof ValidationError ? error.message : "Error al actualizar el nombre";
@@ -44,15 +60,14 @@ export function ModalUpdateProjectName({ projectId, currentName, onSuccess }: Mo
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => {
-      setIsOpen(open);
-      if (!open) setNewName(currentName);
-    }}>
-      <DialogTrigger asChild>
-        <Button variant="ghost" size="icon" className="h-8 w-8 text-stone-400 hover:text-amber-600 dark:text-stone-500 dark:hover:text-amber-400 cursor-pointer">
-          <Pencil className="h-4 w-4" />
-        </Button>
-      </DialogTrigger>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      {!isControlled && (
+        <DialogTrigger asChild>
+          <Button variant="ghost" size="icon" className="h-8 w-8 text-stone-400 hover:text-amber-600 dark:text-stone-500 dark:hover:text-amber-400 cursor-pointer">
+            <Pencil className="h-4 w-4" />
+          </Button>
+        </DialogTrigger>
+      )}
       <DialogContent className="sm:max-w-md bg-white dark:bg-stone-900 ring-1 ring-stone-200/80 dark:ring-stone-800/60 border-none">
         <DialogTitle className="text-lg font-semibold text-stone-800 dark:text-stone-100">
           Editar nombre del proyecto
@@ -71,7 +86,7 @@ export function ModalUpdateProjectName({ projectId, currentName, onSuccess }: Mo
           </div>
         </div>
         <DialogFooter className="flex justify-end gap-2 mt-4">
-          <Button type="button" variant="outline" className="cursor-pointer" onClick={() => setIsOpen(false)} disabled={isUpdating}>
+          <Button type="button" variant="outline" className="cursor-pointer" onClick={() => handleOpenChange(false)} disabled={isUpdating}>
             Cancelar
           </Button>
           <Button type="button" className="cursor-pointer bg-amber-600 hover:bg-amber-700 dark:bg-amber-500 dark:hover:bg-amber-400 dark:text-stone-900" onClick={handleUpdateName} disabled={isUpdating || !newName.trim() || newName.trim() === currentName}>

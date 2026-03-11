@@ -1,5 +1,6 @@
-import { db } from "@/lib/firebase";
-import { collection, addDoc, query, where, doc, getDoc, orderBy, updateDoc, onSnapshot } from "firebase/firestore";
+import { db, storage } from "@/lib/firebase";
+import { collection, addDoc, query, where, doc, getDoc, orderBy, updateDoc, onSnapshot, getDocs, writeBatch } from "firebase/firestore";
+import { ref, deleteObject } from "firebase/storage";
 import { Project } from "../types/project";
 import { validateProjectName, validateId } from "@/lib/validators";
 
@@ -68,5 +69,49 @@ export const projectsService = {
     await updateDoc(docRef, {
       name: validName,
     });
+  },
+
+  // 5. Delete project and all associated tasks + their images
+  deleteProject: async (projectId: string, userId: string) => {
+    validateId(projectId, "Project ID");
+    validateId(userId, "User ID");
+
+    const projectRef = doc(db, "projects", projectId);
+    const projectSnap = await getDoc(projectRef);
+
+    if (!projectSnap.exists()) {
+      throw new Error(`Project "${projectId}" not found.`);
+    }
+
+    // Query all tasks associated with this project (userId required by Firestore rules)
+    const tasksQuery = query(
+      collection(db, "tasks"),
+      where("projectId", "==", projectId),
+      where("userId", "==", userId)
+    );
+    const tasksSnapshot = await getDocs(tasksQuery);
+
+    // Delete images from Storage (before batch, since Storage isn't transactional)
+    for (const taskDoc of tasksSnapshot.docs) {
+      const imageUrl = taskDoc.data().imageUrl;
+      if (imageUrl) {
+        try {
+          const imageRef = ref(storage, imageUrl);
+          await deleteObject(imageRef);
+        } catch (error) {
+          console.error(`Failed to delete image for task "${taskDoc.id}":`, error);
+        }
+      }
+    }
+
+    // Use a batch to atomically delete all task documents + the project document
+    const batch = writeBatch(db);
+
+    for (const taskDoc of tasksSnapshot.docs) {
+      batch.delete(taskDoc.ref);
+    }
+    batch.delete(projectRef);
+
+    await batch.commit();
   }
 };

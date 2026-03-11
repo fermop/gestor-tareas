@@ -11,6 +11,7 @@ import { Project } from "../types/project";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
+import { ProjectDropdownMenu } from "./ProjectDropdownMenu";
 
 export function ProjectsView() {
   const [user, setUser] = useState<User | null>(null);
@@ -81,18 +82,28 @@ export function ProjectsView() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {proyectos.map((proyecto) => (
-            <Link
-              href={`/proyectos/${proyecto.id}`}
+            <div
               key={proyecto.id}
-              className="group block p-6 bg-white dark:bg-stone-900/60 ring-1 ring-stone-200/80 dark:ring-stone-800/60 rounded-2xl hover:ring-amber-300 dark:hover:ring-amber-600/40 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-stone-900/5 dark:hover:shadow-black/20"
+              className="relative group p-6 bg-white dark:bg-stone-900/60 ring-1 ring-stone-200/80 dark:ring-stone-800/60 rounded-2xl hover:ring-amber-300 dark:hover:ring-amber-600/40 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-stone-900/5 dark:hover:shadow-black/20"
             >
-              <h3 className="text-lg font-semibold text-stone-800 dark:text-stone-100 group-hover:text-amber-700 dark:group-hover:text-amber-400 transition-colors">
-                {proyecto.name}
-              </h3>
-              <p className="text-sm text-stone-400 dark:text-stone-500 mt-2 font-mono">
-                {new Date(proyecto.createdAt).toLocaleDateString()}
-              </p>
-            </Link>
+              <Link
+                href={`/proyectos/${proyecto.id}`}
+                className="block"
+              >
+                <h3 className="text-lg font-semibold text-stone-800 dark:text-stone-100 group-hover:text-amber-700 dark:group-hover:text-amber-400 transition-colors pr-8">
+                  {proyecto.name}
+                </h3>
+                <p className="text-sm text-stone-400 dark:text-stone-500 mt-2 font-mono">
+                  {new Date(proyecto.createdAt).toLocaleDateString()}
+                </p>
+              </Link>
+              <div className="absolute top-4 right-4">
+                <ProjectDropdownMenu
+                  projectId={proyecto.id}
+                  projectName={proyecto.name}
+                />
+              </div>
+            </div>
           ))}
         </div>
       )}
