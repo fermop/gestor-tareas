@@ -16,7 +16,7 @@ import { ProjectDropdownMenu } from "./ProjectDropdownMenu";
 export function ProjectsView() {
   const [user, setUser] = useState<User | null>(null);
   const [nombreProyecto, setNombreProyecto] = useState("");
-  
+
   const [proyectos, setProyectos] = useState<Project[]>([]);
   const [lastDoc, setLastDoc] = useState<any>(null);
   const [hasMore, setHasMore] = useState(false);
@@ -34,7 +34,7 @@ export function ProjectsView() {
   // Initial fetch
   useEffect(() => {
     if (!user) return;
-    
+
     const loadInitialProjects = async () => {
       setIsLoading(true);
       try {
@@ -54,7 +54,7 @@ export function ProjectsView() {
 
   const fetchMoreProjects = async () => {
     if (!user || !hasMore || isFetchingMore) return;
-    
+
     setIsFetchingMore(true);
     try {
       const { data, lastVisible, hasMore: newHasMore } = await projectsService.getProjectsPage(user.uid, lastDoc);
@@ -76,7 +76,7 @@ export function ProjectsView() {
 
     try {
       const newProjectId = await projectsService.createProject(nombreOptimista, user.uid);
-      
+
       // Optimistic Update
       const newProject: Project = {
         id: newProjectId,
@@ -84,7 +84,7 @@ export function ProjectsView() {
         userId: user.uid,
         createdAt: new Date().toISOString(),
       };
-      
+
       setProyectos(prev => [newProject, ...prev]);
       toast.success(`Proyecto "${nombreOptimista}" creado correctamente`);
       setNombreProyecto("");
@@ -102,7 +102,11 @@ export function ProjectsView() {
     setProyectos(prev => prev.map(p => p.id === id ? { ...p, name: newName } : p));
   };
 
-  if (!user) return <div className="p-8 text-center text-stone-500">Por favor, inicia sesión primero.</div>;
+  if (!user) return <div className="p-8 text-center text-stone-500">
+    <div className="min-h-screen bg-stone-50 dark:bg-stone-950 grid place-items-center">
+      <Loader2 className="w-10 h-10 text-stone-900 dark:text-stone-50 animate-spin" />
+    </div>
+  </div>;
 
   return (
     <div className="max-w-4xl mx-auto p-8">

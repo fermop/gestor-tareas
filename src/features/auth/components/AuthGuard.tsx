@@ -13,10 +13,8 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (!user) {
-        // Si no hay usuario, lo pateamos al login
         router.push("/login");
       } else {
-        // Si sí hay usuario, le permitimos ver la pantalla
         setCargando(false);
       }
     });
@@ -24,11 +22,10 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
     return () => unsubscribe();
   }, [router]);
 
-  // Mientras Firebase verifica la sesión, mostramos una pantalla en blanco o un loader
   if (cargando) {
     return (
-      <div className="min-h-screen bg-zinc-50 dark:bg-zinc-900 flex items-center justify-center text-zinc-500">
-        <Loader2 className="w-10 h-10 text-zinc-900 dark:text-zinc-50 animate-spin" />
+      <div className="min-h-screen bg-stone-50 dark:bg-stone-950 grid place-items-center">
+        <Loader2 className="w-10 h-10 text-stone-900 dark:text-stone-50 animate-spin" />
       </div>
     );
   }
