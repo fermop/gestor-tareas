@@ -17,6 +17,7 @@ import { Loader2 } from "lucide-react";
 import { TaskDropdownMenu } from "./TaskDropdownMenu";
 import ModalConfirmDelete from "@/components/ui/ModalConfirmDelete";
 import ModalUpdateTaskInfo from "./ModalUpdateTaskInfo";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface TaskListProps {
   projectId: string;
@@ -104,7 +105,24 @@ export function TaskList({
     }
   };
 
-  if (isLoading) return <div className="mt-8 text-sm text-stone-400 animate-pulse flex items-center"><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Cargando tareas...</div>;
+  if (isLoading) {
+    return (
+      <div className="mt-8 space-y-3 pointer-events-none">
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="p-4 rounded-xl flex flex-col gap-3 bg-white dark:bg-stone-900/60 ring-1 ring-stone-200/80 dark:ring-stone-800/60 opacity-60">
+            <div className="flex justify-between items-start">
+              <Skeleton className="h-5 w-24 rounded-md" />
+              <Skeleton className="h-8 w-8 rounded-md" />
+            </div>
+            <div className="flex items-center gap-3">
+              <Skeleton className="h-4 w-4 rounded-sm" />
+              <Skeleton className="h-5 w-3/4 rounded-md" />
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
   if (tareas.length === 0) return <div className="mt-8 p-10 border-2 border-dashed border-stone-200 dark:border-stone-800 rounded-2xl text-center text-stone-400 dark:text-stone-500">No hay tareas registradas. Escribe una arriba para comenzar.</div>;
 
   return (

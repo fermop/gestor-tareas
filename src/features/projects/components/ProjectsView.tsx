@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Plus, Loader2 } from "lucide-react";
 import { ProjectDropdownMenu } from "./ProjectDropdownMenu";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export function ProjectsView() {
   const [user, setUser] = useState<User | null>(null);
@@ -102,11 +103,22 @@ export function ProjectsView() {
     setProyectos(prev => prev.map(p => p.id === id ? { ...p, name: newName } : p));
   };
 
-  if (!user) return <div className="p-8 text-center text-stone-500">
-    <div className="min-h-screen bg-stone-50 dark:bg-stone-950 grid place-items-center">
-      <Loader2 className="w-10 h-10 text-stone-900 dark:text-stone-50 animate-spin" />
-    </div>
-  </div>;
+  if (!user) {
+    return (
+      <div className="max-w-4xl mx-auto p-8 opacity-50 pointer-events-none">
+        <Skeleton className="h-9 w-48 mb-8" />
+        <div className="mb-8 flex flex-col sm:flex-row gap-3">
+          <Skeleton className="h-10 flex-1" />
+          <Skeleton className="h-10 w-36" />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+          <Skeleton className="h-[120px] rounded-2xl" />
+          <Skeleton className="h-[120px] rounded-2xl" />
+          <Skeleton className="h-[120px] rounded-2xl" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-4xl mx-auto p-8">
@@ -131,8 +143,13 @@ export function ProjectsView() {
       </form>
 
       {isLoading ? (
-        <div className="flex justify-center py-12">
-          <Loader2 className="h-8 w-8 animate-spin text-stone-400" />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8 pointer-events-none">
+          <Skeleton className="h-[120px] w-full rounded-2xl" />
+          <Skeleton className="h-[120px] w-full rounded-2xl" />
+          <Skeleton className="h-[120px] w-full rounded-2xl" />
+          <Skeleton className="h-[120px] w-full rounded-2xl hidden md:block" />
+          <Skeleton className="h-[120px] w-full rounded-2xl hidden md:block" />
+          <Skeleton className="h-[120px] w-full rounded-2xl hidden md:block" />
         </div>
       ) : proyectos.length === 0 ? (
         <div className="p-12 border-2 border-dashed border-stone-200 dark:border-stone-800 rounded-2xl text-center text-stone-400 dark:text-stone-500">
