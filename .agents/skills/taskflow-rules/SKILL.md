@@ -1,3 +1,8 @@
+---
+name: taskflow-project-rules
+description: Core architecture, language conventions, coding best practices, and Firebase optimization rules for the TaskFlow project. Must be followed for all code generation, modifications, and UI development.
+---
+
 # Project Rules: TaskFlow
 
 ## 🌍 Language Conventions
